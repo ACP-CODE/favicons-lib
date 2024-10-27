@@ -223,6 +223,7 @@ export class AndroidPlatform extends Platform {
 
     const properties: Record<string, unknown> = {
       name: options.appName,
+      name_localized: options.name_localized,
       short_name: options.appShortName || options.appName,
       categories: options.appCategories,
       description: options.appDescription,
@@ -277,7 +278,7 @@ export class AndroidPlatform extends Platform {
         sizes: `${width}x${height}`,
         type: "image/png",
         purpose:
-          iconOptions.purpose ?? (width === 512 ? "any" : defaultPurpose), // 自动添加 any 以排除至少需要一个 any 的警告
+          iconOptions.purpose ?? (width === 512 ? "maskable" : defaultPurpose), // 自动添加 any 以排除至少需要一个 any 的警告
       };
     });
 

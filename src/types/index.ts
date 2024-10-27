@@ -96,3 +96,4 @@ export type Platforms =
 export { FileHandler } from "./FileHandler";
 export { ShareTarget } from "./ShareTarget";
 export { ProtocolHandler } from "./ProtocolHandler";
+export { LocalizedManifest } from "./Localized";

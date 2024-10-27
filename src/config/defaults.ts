@@ -8,6 +8,7 @@ import {
   FileHandler,
   ShareTarget,
   ProtocolHandler,
+  LocalizedManifest,
 } from "../types";
 
 export interface IconSize {
@@ -68,7 +69,7 @@ export interface OutputOptions {
   readonly html?: boolean;
 }
 
-export interface FaviconOptions {
+export interface FaviconOptions extends LocalizedManifest {
   readonly path?: string;
   readonly appName?: string;
   readonly appShortName?: string;
