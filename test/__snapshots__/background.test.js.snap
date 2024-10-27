@@ -68,7 +68,7 @@ exports[`should allow configuring background color on selected platforms 71`] = 
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }",

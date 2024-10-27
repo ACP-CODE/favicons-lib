@@ -68,7 +68,7 @@ exports[`should allow setting an URL query parameter for cache busting 1`] = `
       "src": "/android-chrome-512x512.png?v=1",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }",

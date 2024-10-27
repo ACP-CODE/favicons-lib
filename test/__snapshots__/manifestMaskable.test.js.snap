@@ -68,7 +68,7 @@ exports[`manifestMaskable should accept an array of either buffers or paths to s
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     },
     {
       "src": "/android-chrome-maskable-36x36.png",
@@ -607,7 +607,7 @@ exports[`should add \`maskable\` to manifest purpose when manifestMaskable is tr
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }",

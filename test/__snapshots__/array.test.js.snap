@@ -68,7 +68,7 @@ exports[`should accept an array of either buffers or paths to source images 71`]
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }",
@@ -519,7 +519,7 @@ exports[`should select best source image by its size 71`] = `
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "maskable"
     }
   ]
 }",
