@@ -49,9 +49,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/itgalaxy/favicons/issues"
+    "url": "https://github.com/ACP-CODE/favicons-lib/issues"
   },
-  "homepage": "https://github.com/itgalaxy/favicons",
+  "homepage": "https://github.com/ACP-CODE/favicons-lib",
   "engines": {
     "node": ">=14.0.0"
   },
