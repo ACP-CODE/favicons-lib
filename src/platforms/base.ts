@@ -95,7 +95,7 @@ export class Platform<IO extends NamedIconOptions = NamedIconOptions> {
   }
 
   protected relative(path: string): string {
-    return relativeTo(this.options.path, path);
+    return relativeTo(this.options.output.assetsPrefix, path);
   }
 
   protected cacheBusting(path: string): string {

@@ -1,9 +1,14 @@
 import { Transform, TransformCallback } from "stream";
-import { type FaviconOptions, defaultOptions } from "./config/defaults";
+import {
+  type FaviconOptions,
+  type NamedIconOptions,
+  defaultOptions,
+} from "./config/defaults";
+import type { PlatformName } from "./platforms";
 import { sourceImages } from "./helpers";
 import { getPlatform } from "./platforms/index";
 
-export { FaviconOptions };
+export { FaviconOptions, NamedIconOptions, PlatformName };
 
 export interface FaviconImage {
   readonly name: string;
@@ -29,7 +34,7 @@ export interface FaviconResponse {
 
 export async function favicons(
   source: string | Buffer | (string | Buffer)[],
-  options: FaviconOptions = {},
+  options: FaviconOptions = { name: null, short_name: null },
 ): Promise<FaviconResponse> {
   options = {
     ...defaultOptions,

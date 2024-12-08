@@ -37,7 +37,7 @@ export class YandexPlatform extends Platform {
   private manifest(): FaviconFile {
     const basePath = this.options.manifestRelativePaths
       ? null
-      : this.options.path;
+      : this.options.output.assetsPrefix;
 
     const logo = this.iconOptions[0].name;
 

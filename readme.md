@@ -1,12 +1,17 @@
-# Favicons
+# Overview
 
-[![NPM version](https://img.shields.io/npm/v/favicons-lib.svg)](https://www.npmjs.org/package/favicons-lib)
-[![Build Status](https://github.com/itgalaxy/favicons/actions/workflows/ci.yml/badge.svg)](https://github.com/itgalaxy/favicons/actions/workflows/ci.yml)
+[![NPM Version](https://img.shields.io/npm/v/favicons-lib?logoColor=%22%23ea2039%22&label=favicons-lib)
+](https://www.npmjs.org/package/favicons)
+[![Build Status](https://github.com/ACP-CODE/favicons/actions/workflows/ci.yml/badge.svg)](https://github.com/ACP-CODE/favicons/actions/workflows/ci.yml)
 
-A **Node.js module** for generating favicons and their associated files. Originally built for [Google's Web Starter Kit](https://github.com/google/web-starter-kit) and [Catalyst](https://github.com/haydenbleasel/catalyst). Installed through NPM with:
+A **Node.js module** for generating favicons and their associated files. This project is based on and adapts code from the `favicons` library (<https://github.com/itgalaxy/favicons.git>), originally licensed under the MIT License.
+
+Significant modifications have been made, including bug fixes, API redesign,extended functionality (e.g., manifest expansion, screenshots support), and other improvements.
+
+Installed through NPM with:
 
 ```
-npm install favicons
+npm install favicons-lib
 ```
 
 ## Usage
@@ -18,33 +23,26 @@ Favicons generates its icons locally using pure Javascript with no external depe
 Please note: Favicons is tested on Node 14 and above.
 
 ```js
-import { favicons } from "favicons";
+import { favicons } from "favicons-lib";
 
 const source = "test/logo.png"; // Source image(s). `string`, `buffer` or array of `string`
 
 const configuration = {
-  path: "/", // Path for overriding default icons path. `string`
-  appName: null, // Your application's name. `string`
-  appShortName: null, // Your application's short_name. `string`. Optional. If not set, appName will be used
-  appDescription: null, // Your application's description. `string`
-  developerName: null, // Your (or your developer's) name. `string`
-  developerURL: null, // Your (or your developer's) URL. `string`
-  cacheBustingQueryParam: null, // Query parameter added to all URLs that acts as a cache busting system. `string | null`
-  dir: "auto", // Primary text direction for name, short_name, and description
-  lang: "en-US", // Primary language for name and short_name
-  background: "#fff", // Background colour for flattened icons. `string`
-  theme_color: "#fff", // Theme color user for example in Android's task switcher. `string`
+  name: null, // Your application's name. `string`
+  short_name: null, // Your application's short_name. `string`. Optional. If not set, appName will be used
+  description: null, // Your application's description. `string`
   appleStatusBarStyle: "black-translucent", // Style for Apple status bar: "black-translucent", "default", "black". `string`
-  display: "standalone", // Preferred display mode: "fullscreen", "standalone", "minimal-ui" or "browser". `string`
-  orientation: "any", // Default orientation: "any", "natural", "portrait" or "landscape". `string`
-  scope: "/", // set of URLs that the browser considers within your app
-  start_url: "/?homescreen=1", // Start URL when launching the application from a device. `string`
-  preferRelatedApplications: false, // Should the browser prompt the user to install the native companion app. `boolean`
-  relatedApplications: undefined, // Information about the native companion apps. This will only be used if `preferRelatedApplications` is `true`. `Array<{ id: string, url: string, platform: string }>`
-  version: "1.0", // Your application's version string. `string`
-  pixel_art: false, // Keeps pixels "sharp" when scaling up, for pixel art.  Only supported in offline mode.
-  loadManifestWithCredentials: false, // Browsers don't send cookies when fetching a manifest, enable this to fix that. `boolean`
-  manifestMaskable: false, // Maskable source image(s) for manifest.json. "true" to use default source. More information at https://web.dev/maskable-icon/. `boolean`, `string`, `buffer` or array of `string`
+  themes: ["#fff", "#000"], // Theme color user for example in Android's task switcher. `string`
+  manifest: {
+    dir: "auto", // Primary text direction for name, short_name, and description
+    lang: "en-US", // Primary language for name and short_name
+    background: "#fff", // Background colour for flattened icons. `string`
+    orientation: "any", // Default orientation: "any", "natural", "portrait" or "landscape". `string`
+    scope: "/", // set of URLs that the browser considers within your app
+    start_url: "/?homescreen=1", // Start URL when launching the application from a device. `string`
+    display: "standalone", // Preferred display mode: "fullscreen", "standalone", "minimal-ui" or "browser". `string`
+    display_override: ["window-controls-overlay", "minimal-ui"],
+  },
   icons: {
     // Platform Options:
     // - offset - offset in percentage
@@ -72,14 +70,7 @@ const configuration = {
     },
     // more shortcuts objects
   ],
-  screenshots:[
-    {
-      platform: "",
-      label: ""
-      image: "src/pwa/screenshot.png", // screenshot
-      format: "webp"
-    }
-  ]
+  screenshots: [],
 };
 
 try {
@@ -121,7 +112,8 @@ The default sources are as follow (groupped by platform):
     "apple-touch-icon-72x72.png",
     "apple-touch-icon-76x76.png",
     "apple-touch-icon-precomposed.png",
-    "apple-touch-icon.png"
+    "apple-touch-icon.png",
+    "safari-pinned-tab.svg"
   ],
   "appleStartup": [
     "apple-touch-startup-image-1125x2436.png",
@@ -145,13 +137,22 @@ The default sources are as follow (groupped by platform):
     "apple-touch-startup-image-2732x2048.png",
     "apple-touch-startup-image-640x1136.png",
     "apple-touch-startup-image-750x1334.png",
-    "apple-touch-startup-image-828x1792.png"
+    "apple-touch-startup-image-828x1792.png",
+    "apple-touch-startup-image-1179x2556.png",
+    "apple-touch-startup-image-2556x1179.png",
+    "apple-touch-startup-image-1290x2796.png",
+    "apple-touch-startup-image-2796x1290.png",
+    "apple-touch-startup-image-1488x2266.png",
+    "apple-touch-startup-image-2266x1488.png",
+    "apple-touch-startup-image-1640x2360.png",
+    "apple-touch-startup-image-2360x1640.png"
   ],
   "favicons": [
     "favicon-16x16.png",
     "favicon-32x32.png",
     "favicon-48x48.png",
-    "favicon.ico"
+    "favicon.ico",
+    "favicon.svg"
   ],
   "windows": [
     "mstile-144x144.png",
@@ -170,13 +171,13 @@ The default sources are as follow (groupped by platform):
 You can programmatically access Favicons configuration (icon filenames, HTML, manifest files, etc) with:
 
 ```js
-import { config } from "favicons";
+import { config } from "favicons-lib";
 ```
 
 Below you will find a simple working example to generate an output. Amend the `src`, `dest`, `htmlBasename` and `configuration` constants to suit your own needs.
 
 ```js
-import favicons from "favicons";
+import favicons from "favicons-lib";
 import fs from "fs/promises";
 import path from "path";
 
@@ -186,10 +187,9 @@ const htmlBasename = "index.html"; // HTML file basename.
 
 // Configuration (see above in the README file).
 const configuration = {
-  path: "/favicons",
-  appName: "My Great App",
-  appShortName: "Great App",
-  appDescription: "A great application to test itgalaxy/favicons.",
+  name: "My Great App",
+  short_name: "Great App",
+  description: "A great application to test itgalaxy/favicons.",
   // Extra options...
 };
 

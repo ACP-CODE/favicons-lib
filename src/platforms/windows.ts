@@ -63,7 +63,7 @@ export class WindowsPlatform extends Platform {
   private browserConfig(): FaviconFile {
     const basePath = this.options.manifestRelativePaths
       ? null
-      : this.options.path;
+      : this.options.output.assetsPrefix;
 
     const tile: Record<string, unknown> = {};
 

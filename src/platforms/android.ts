@@ -14,11 +14,8 @@ import {
   createScreenshot,
 } from "../helpers";
 import { Platform, uniformIconOptions } from "./base";
-
-import {
-  DevicePlatformIdentifiers,
-  DistributionPlatformIdentifiers,
-} from "../types";
+import { Screenshot } from "../types/manifest/w3/Image";
+import { FormatEnum } from "sharp";
 
 interface Icon {
   readonly src: string;
@@ -32,15 +29,6 @@ interface Shortcut {
   readonly description?: string;
   readonly url: string;
   readonly icons?: Icon[];
-}
-
-export interface Screenshot {
-  src: string;
-  sizes: string;
-  type: string;
-  form_factor?: "narrow" | "wide";
-  label?: string;
-  platform?: DevicePlatformIdentifiers | DistributionPlatformIdentifiers;
 }
 
 const ICONS_OPTIONS: NamedIconOptions[] = [
@@ -144,11 +132,6 @@ export class AndroidPlatform extends Platform {
       icons = [...icons, ...(await this.shortcutIcons())];
     }
 
-    // Convert screenshots
-    if (this.options.screenshots) {
-      icons = [...icons, ...(await this.screenshots())];
-    }
-
     return icons;
   }
 
@@ -157,16 +140,37 @@ export class AndroidPlatform extends Platform {
   }
 
   override async createHtml(): Promise<FaviconHtmlElement[]> {
-    // prettier-ignore
+    const manifestLink = this.options.loadManifestWithCredentials
+      ? `<link rel="manifest" href="${this.cacheBusting(
+          this.relative(this.manifestFileName()),
+        )}" crossorigin="use-credentials">`
+      : `<link rel="manifest" href="${this.cacheBusting(
+          this.relative(this.manifestFileName()),
+        )}">`;
+
+    const themeMetaTags =
+      Array.isArray(this.options.themes) && this.options.themes.length > 1
+        ? [
+            `<meta name="theme-color" media="(prefers-color-scheme: light)" content="${this.options.themes[0]}">`,
+            `<meta name="theme-color" media="(prefers-color-scheme: dark)" content="${this.options.themes[1]}">`,
+          ]
+        : [
+            `<meta name="theme-color" content="${
+              this.options?.themes?.[0] || this.options?.background
+            }">`,
+          ];
+
+    const appNameMetaTag = this.options.name
+      ? `<meta name="application-name" content="${escapeHtml(
+          this.options.name,
+        )}">`
+      : `<meta name="application-name">`;
+
     return [
-      this.options.loadManifestWithCredentials
-        ? `<link rel="manifest" href="${this.cacheBusting(this.relative(this.manifestFileName()))}" crossOrigin="use-credentials">`
-        : `<link rel="manifest" href="${this.cacheBusting(this.relative(this.manifestFileName()))}">`,
+      manifestLink,
       `<meta name="mobile-web-app-capable" content="yes">`,
-      `<meta name="theme-color" content="${this.options.theme_color || this.options.background}">`,
-      this.options.appName
-        ? `<meta name="application-name" content="${escapeHtml(this.options.appName)}">`
-        : `<meta name="application-name">`,
+      ...themeMetaTags,
+      appNameMetaTag,
     ];
   }
 
@@ -192,18 +196,21 @@ export class AndroidPlatform extends Platform {
   private async screenshots(): Promise<FaviconImage[]> {
     const screenshots = await Promise.all(
       this.options.screenshots.map(async (screenshot, index) => {
-        if (!screenshot.image) return null;
-        const screenshotSourceset = await sourceImages(screenshot.image);
+        if (!screenshot.src) return null;
+        const screenshotSourceset = await sourceImages(screenshot.src);
         const { width, height } = screenshotSourceset[0].metadata;
-        const { platform, format } = screenshot;
-        const Format = format || "webp";
-        const prefix = platform ? `${platform}-` : "";
+        const { type, sizes: providedSizes, platform } = screenshot;
+        const finalSizes = providedSizes || `${width}x${height}`;
+        const Format = (type?.split("/")[1] ?? "webp") as keyof FormatEnum;
+        const prefix = platform ? `${platform}_` : "";
 
         const screenshotImages = await createScreenshot(
           screenshotSourceset,
-          // prettier-ignore
-          `${prefix}screenshots${index + 1}-${width}x${height}.${Format}`,
-          Format,
+          `${prefix}screenshots${index + 1}-${finalSizes}.${Format}`,
+          {
+            sizes: finalSizes,
+            format: Format,
+          },
         );
         return screenshotImages;
       }),
@@ -219,40 +226,33 @@ export class AndroidPlatform extends Platform {
 
   private async manifest(): Promise<FaviconFile> {
     const { options } = this;
-    const basePath = options.manifestRelativePaths ? null : options.path;
+    const basePath = options.manifestRelativePaths
+      ? null
+      : options.output.assetsPrefix;
 
     const properties: Record<string, unknown> = {
-      name: options.appName,
-      name_localized: options.name_localized,
-      short_name: options.appShortName || options.appName,
-      categories: options.appCategories,
-      description: options.appDescription,
-      dir: options.dir,
-      lang: options.lang,
-      display: options.display,
-      display_override: options.display_override,
-      file_handlers: options.file_handlers,
-      orientation: options.orientation,
-      protocol_handlers: options.protocol_handlers,
-      scope: options.scope,
-      id: options.id,
-      share_target: options.share_target,
-      start_url: options.start_url,
+      name: options.name,
+      name_localized: options?.name_localized,
+      short_name: options.short_name ?? options.name,
+      short_name_localized: options.short_name_localized,
+      description: options.manifest.description,
+      description_localized: options.manifest.description_localized,
+      ...options.manifest,
+      theme_color: options?.themes?.[0],
       background_color: options.background,
-      theme_color: options.theme_color,
     };
 
     // Defaults to false, so omit the value https://developer.mozilla.org/en-US/docs/Web/Manifest/prefer_related_applications
-    if (options.preferRelatedApplications) {
+    if (options.manifest.prefer_related_applications) {
       properties.prefer_related_applications =
-        options.preferRelatedApplications;
+        options.manifest.prefer_related_applications;
     }
     // Only include related_applications if a lengthy array is provided.
     if (
-      Array.isArray(options.relatedApplications) &&
-      options.relatedApplications.length > 0
+      Array.isArray(options.manifest.related_applications) &&
+      options.manifest.related_applications.length > 0
     ) {
-      properties.related_applications = options.relatedApplications;
+      properties.related_applications = options.manifest.related_applications;
     }
 
     let icons = this.iconOptions;
@@ -268,7 +268,7 @@ export class AndroidPlatform extends Platform {
     }
 
     const defaultPurpose =
-      options.manifestMaskable === true ? "maskable" : "any";
+      options.manifestMaskable === true ? "any maskable" : "any";
 
     properties.icons = icons.map((iconOptions) => {
       const { width, height } = iconOptions.sizes[0];
@@ -277,8 +277,7 @@ export class AndroidPlatform extends Platform {
         src: this.cacheBusting(relativeTo(basePath, iconOptions.name)),
         sizes: `${width}x${height}`,
         type: "image/png",
-        purpose:
-          iconOptions.purpose ?? (width === 512 ? "maskable" : defaultPurpose), // 自动添加 any 以排除至少需要一个 any 的警告
+        purpose: iconOptions.purpose ?? defaultPurpose,
       };
     });
 
@@ -286,7 +285,6 @@ export class AndroidPlatform extends Platform {
       properties.shortcuts = this.manifestShortcuts(basePath);
     }
 
-    // 添加 screenshots 属性
     if (Array.isArray(options.screenshots) && options.screenshots.length > 0) {
       properties.screenshots = await this.manifestScreenshots(basePath);
     }
@@ -331,34 +329,46 @@ export class AndroidPlatform extends Platform {
   private async manifestScreenshots(basePath: string): Promise<Screenshot[]> {
     const screenshots = await Promise.all(
       this.options.screenshots.map(async (screenshot, index) => {
-        const { form_factor, label, platform, image, format } = screenshot;
+        const {
+          src,
+          type,
+          form_factor,
+          label,
+          platform,
+          sizes: providedSizes,
+        } = screenshot;
 
         try {
-          // 获取图片的宽高
-          const screenshotSourceset = await sourceImages(image);
+          const screenshotSourceset = await sourceImages(src);
           if (screenshotSourceset.length === 0) {
             throw new Error("No valid source images found");
           }
+
           const { width, height } = screenshotSourceset[0].metadata;
 
-          // 根据 width 动态生成 form_factor，如果没有指定则自动推断
-          const calculatedFormFactor =
-            form_factor || (width < 720 ? "narrow" : "wide");
+          // Check if sizes is defined and valid; if not, use original width x height
+          const finalSizes = providedSizes || `${width}x${height}`;
+          const [calculatedWidth] = finalSizes.split("x").map(Number);
 
-          const prefix = platform ? `${platform}-` : "";
+          // Calculate form_factor based on final sizes
+          const calculatedFormFactor =
+            form_factor ?? (calculatedWidth < 720 ? "narrow" : "wide");
+
+          const prefix = platform ? `${platform}_` : "";
 
           const screenshotImageSrc = this.cacheBusting(
             relativeTo(
               basePath,
-              // prettier-ignore
-              `${prefix}screenshots${index + 1}-${width}x${height}.${format || "webp"}`,
+              `${prefix}screenshots${index + 1}-${finalSizes}.${
+                type?.split("/")[1] ?? "webp"
+              }`,
             ),
           );
 
           return {
             src: screenshotImageSrc,
-            sizes: `${width}x${height}`,
-            type: `image/${format || "webp"}`,
+            sizes: finalSizes,
+            type: `${type || "image/webp"}`,
             form_factor: calculatedFormFactor,
             label,
             platform,
